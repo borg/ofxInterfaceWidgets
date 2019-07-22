@@ -3,6 +3,8 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+    ofEnableSmoothing();
+    ofEnableAlphaBlending();
     ofSetFrameRate(30);
     ofBackground(64);
 
@@ -12,33 +14,32 @@ void ofApp::setup()
 
     TouchManager::one().setup(scene);
 
-    //---
+    //--
 
     // 1. IMAGE BUTTON:
 
-    float iconDim = 30;
-    float sceneWidth = 600;
-    float sceneHeight = 10;
+    float iconDim = 100;
     
     Button * startBtn = new ofxInterface::Button();
     startBtn->setImages(new ButtonImages("images.jpg"));
-    startBtn->setSize(iconDim,iconDim);
+    startBtn->setSize(iconDim, iconDim);
     startBtn->setName("startBtn");
-    startBtn->setPosition(sceneWidth/2-iconDim/2,sceneHeight-iconDim-80,0);
+    startBtn->setPosition(600, 50, 0);
     startBtn->setPlane(3);
     scene->addChild(startBtn);
 
     ofAddListener(startBtn->eventTouchDown, this, &ofApp::nodeDown);
     ofAddListener(startBtn->eventTouchUp, this, & ofApp::nodeUp);
 
-    //---------------
+    //--
 
-    // 2. SCROLL VIEW:
+    // 2. SCROLL VIEW OF BUTTONS:
 
     // create view canvas
 
 //    ScrollView * scrollView_canvas = new ofxInterface::ScrollView();
     scrollView_canvas = new ofxInterface::ScrollView();
+
     scrollView_canvas->setSize(200, 500);
     scrollView_canvas->setName("scrollView_canvas");
     scrollView_canvas->setPosition(0, 0, 0);
@@ -48,7 +49,9 @@ void ofApp::setup()
 //    scrollView_canvas->setScale(0.5);
 //    scrollView_canvas->setZoom(0.5);
 
-    // add childrens
+    //-
+
+    // add button childrens to scrollView canvas
     for (int i=0; i<50; i++)
     {
         Button * startBtn = new ofxInterface::Button();
@@ -62,7 +65,7 @@ void ofApp::setup()
     }
     scene->addChild(scrollView_canvas);
 
-    //------------
+    //--
 }
 
 //--------------------------------------------------------------
@@ -78,20 +81,33 @@ void ofApp::nodeUp(TouchEvent& event){
 //--------------------------------------------------------------
 void ofApp::update(){
 
+    float fps = 30.0;
+    float dt = 1. / fps;
+
+    //-
+
     TouchManager::one().update();
+
+    //-
+
+    // 2. SCROLL VIEW OF BUTTONS:
+
+    scene->updateSubtree(dt, true);//required?
 
     for (int i = 0; i < buttons.size(); i++)
     {
-        buttons[i]->update();
+        buttons[i]->update();//required?
     }
 
-    float dt = 1. / 30.;
-    scrollView_canvas->update(dt);
+    //-
+
+    scrollView_canvas->update(dt);//required?
 
 //    std::string n = ("scrollView_canvas");
 //    auto a = scene->getChildWithName(n, scene->getNumChildren());
 //    a->update(dt);
 
+    //-
 }
 
 //--------------------------------------------------------------
@@ -103,9 +119,6 @@ void ofApp::draw(){
 //    auto a = scene->getChildWithName(n, scene->getNumChildren());
 //    a->draw();
 
-    /******
-     * if you want debug rendering
-     */
     if (bDebug) {
         scene->renderDebug();
     }
