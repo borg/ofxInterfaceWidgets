@@ -303,7 +303,8 @@ void ScrollView::setContentSize(float w, float h){
     
     ofRectangle rect(0,0,w,h);
     contentRect = rect;
-   //reset();
+    //_canvas.allocate(w,h);
+   reset();
 
 };
 void ScrollView::setContentSize(const ofVec2f& s){
@@ -655,6 +656,8 @@ void ScrollView::update(float dt) {
     
     scrollRect = getRectContainedInWindowRect(scrollRect, bounceBack);
     
+    
+    //cout<<name<<" size "<<getSize()<<" scrollRect "<<scrollRect<<" contentRect "<<contentRect<<endl;
     //==========================================================
     // apply easing to scrollRect.
     //==========================================================
@@ -688,37 +691,44 @@ void ScrollView::update(float dt) {
         //in the node space, to an fbo
         _contentNode->setVisible(true);
         
-        //move this out
-       // _canvas.allocate(getWidth(),getHeight());
-        
-        _canvas.begin();
-        ofClear(255);
-        _beginDraw();
-        
-        ofSetColor(255);
-        
-        
-        ofMatrix4x4 localMat = getLocalTransformMatrix().getInverse();
-        
-        
-        ofPushMatrix();
 
         
-        ofMultMatrix(localMat);
-       
-        //this is assuming the root scene is at 0,0, else we need to offset...not handling now
-        //ofTranslate(-root->getX(),-root->getY());
-        _contentNode->render();
+        //move this out
+        //_canvas.allocate(getWidth(),getHeight());
         
-        _endDraw();
-        ofPopMatrix();
-        _canvas.end();
-        
+        if(_canvas.isAllocated()){
+            _canvas.begin();
+            ofClear(255);
+            if(_drawBg){
+                //premultiplied alphas are washed out in Fbos, helps to fill bg
+                ofSetColor(_bgColor);
+                ofFill();
+                ofDrawRectangle(0,0, getWidth(),getHeight());
+            }
+            _beginDraw();
+            ofSetColor(255);
+            ofMatrix4x4 localMat = getGlobalTransformMatrix();
+            localMat = localMat.getInverse();
+            ofPushMatrix();
+            ofMultMatrix(localMat);
+            _contentNode->render();
+            _endDraw();
+            ofPopMatrix();
+            _canvas.end();
+        }
         _contentNode->setVisible(false);
         
         //this applies the pan/scroll transformation so children will be in correct pos
-        //for touch
-       _contentNode->setTransformMatrix(mat);
+        ofVec3f pos;
+        ofQuaternion rot;
+        ofVec3f scale;
+        ofQuaternion so;
+        mat.decompose(pos, rot, scale, so);
+
+        _contentNode->setPosition(pos);
+        _contentNode->setOrientation(rot);
+        //_contentNode->setScale(scale);//this is a no no
+       
     }
     
     
@@ -739,11 +749,8 @@ void ScrollView::end() {
 
 void ScrollView::draw() {
     _beginDraw();
-    
-    
     update();
     _canvas.draw(0,0);
-    
     _endDraw();
     
 }
@@ -772,6 +779,7 @@ ofRectangle ScrollView::getRectContainedInWindowRect(const ofRectangle & rectToC
     float y0 = boundingRect.y - MAX(rect.height - boundingRect.height, 0.0);
     float y1 = boundingRect.y;
     
+    
     if(rect.x < x0) {
         rect.x += (x0 - rect.x) * easing;
         if(ABS(x0 - rect.x) < kEasingStop) {
@@ -795,7 +803,7 @@ ofRectangle ScrollView::getRectContainedInWindowRect(const ofRectangle & rectToC
             rect.y = y1;
         }
     }
-    
+
     return rect;
 }
 
