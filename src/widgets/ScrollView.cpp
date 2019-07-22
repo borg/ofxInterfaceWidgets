@@ -679,8 +679,15 @@ void ScrollView::update(float dt) {
     if(ABS(scrollRect.height - scrollRectEased.height) < kEasingStop) {
         scrollRectEased.height = scrollRect.height;
     }
-    
-    mat = getMatrixForRect(scrollRectEased);
+
+        cout << "scrollRect : " << scrollRect.x << ", ";
+        cout << "scrollRect : " << scrollRect.y << " ";
+        cout << "zoomMovePos: " << zoomMovePos.x << ", ";
+        cout << "zoomMovePos: " << zoomMovePos.y << " ";
+//        cout << "zoomScale  : " << zoomScale << " ";
+        cout << endl;
+
+        mat = getMatrixForRect(scrollRectEased);
     
     //this is not working properly on iOS8..not sure if its due to the width/height debacle 
     if(_contentNode->getChildren().size()){
