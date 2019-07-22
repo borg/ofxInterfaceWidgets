@@ -40,6 +40,7 @@ void ofApp::setup()
 //    ScrollView * scrollView_canvas = new ofxInterface::ScrollView();
     scrollView_canvas = new ofxInterface::ScrollView();
 
+    scrollView_canvas->setup();//required?
     scrollView_canvas->setSize(200, 500);
     scrollView_canvas->setName("scrollView_canvas");
     scrollView_canvas->setPosition(0, 0, 0);
